@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://via.placeholder.com/150x150/FFF/000?text=UniTEA" alt="UniTEA Logo" width="120" height="120" />
+  <img src="[https://via.placeholder.com/150x150/FFF/000?text=UniTEA](https://cmstest.lottemallwestlakehanoi.vn/storage/tenants/195/727909eb2bc36eb272c37e21458677a184601520.png)" alt="UniTEA Logo" width="120" height="120" />
   <h1>UniTEA - Nền tảng Nâng Tầm Trải Nghiệm Khách Hàng F&B</h1>
   <p>Giải pháp tối ưu hóa thao tác gọi món, phản hồi và chăm sóc khách hàng dựa trên QR Code, dành riêng cho các mô hình cà phê, trà sữa, và nhà hàng cỡ vừa và nhỏ.</p>
 </div>
