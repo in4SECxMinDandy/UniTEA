@@ -1,84 +1,123 @@
-# UniTEA - Ứng dụng Quản lý Cửa hàng F&B
+<div align="center">
+  <img src="https://via.placeholder.com/150x150/FFF/000?text=UniTEA" alt="UniTEA Logo" width="120" height="120" />
+  <h1>UniTEA - Nền tảng Nâng Tầm Trải Nghiệm Khách Hàng F&B</h1>
+  <p>Giải pháp tối ưu hóa thao tác gọi món, phản hồi và chăm sóc khách hàng dựa trên QR Code, dành riêng cho các mô hình cà phê, trà sữa, và nhà hàng cỡ vừa và nhỏ.</p>
+</div>
 
-UniTEA là một ứng dụng web hiện đại dành cho cửa hàng thực phẩm và đồ uống (F&B), được xây dựng bằng [Next.js](https://nextjs.org/) App Router, [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/) để thiết kế giao diện, và [Supabase](https://supabase.com/) cho backend mở rộng và xác thực người dùng.
+<br/>
 
-## 🚀 Tính năng nổi bật
+## 🎯 Tầm nhìn dự án
 
-- **Giao diện hiện đại (Modern UI)**: Được thiết kế với Tailwind CSS, biểu tượng `lucide-react`, và `clsx`/`tailwind-merge` cho các class động, mang lại trải nghiệm người dùng mượt mà và đẹp mắt.
-- **Backend mạnh mẽ (Robust Backend)**: Tích hợp với Supabase (`@supabase/supabase-js`, `@supabase/ssr`) để quản lý cơ sở dữ liệu, xác thực, và Server-Side Rendering (SSR).
-- **Hỗ trợ quét mã QR (QR Code Support)**: Tích hợp khả năng tạo mã QR nhanh chóng cho từng bàn (`qrcode.react`), giúp khách hàng dễ dàng truy cập và tương tác.
-- **Chat trực tuyến cho Khách hàng & Quản trị viên (Realtime Chat)**:
-  - Khách hàng có thể quét mã QR tại bàn để chat trực tiếp với cửa hàng **mà không cần đăng nhập** (sử dụng tính năng Anonymous Sign-in của Supabase).
-  - Nhân viên/Quản lý sử dụng trang Admin để phản hồi khách hàng theo thời gian thực (Supabase Realtime).
-  - Hỗ trợ gửi hình ảnh trong chat được tải lên an toàn qua Supabase Storage.
-  - Lưu trữ phiên trò chuyện liền mạch, khách hàng không bị mất tin nhắn ngay cả khi tải lại trang (lưu giữ session).
-- **Bảo mật chặt chẽ (RLS - Row Level Security)**: Cơ sở dữ liệu và lưu trữ (Storage) được cấu hình bảo mật hoàn toàn với các chính sách RLS, đảm bảo khách hàng ẩn danh và quản lý có quyền hạn chính xác.
-- **An toàn kiểu dữ liệu (Type Safety)**: Được xây dựng hoàn toàn bằng TypeScript.
-- **Hiệu suất cao (Performance)**: Tận dụng các tính năng mới nhất của Next.js 15, React 19 và tiến trình build được tối ưu hóa.
+UniTEA được thiết kế để giải quyết bài toán giao tiếp giữa khách hàng và nhân viên trong một cửa hàng F&B có diện tích hoặc số luợng bàn lớn. Bằng cách sử dụng mã QR duy nhất cho từng bàn, khách hàng có thể quét để trực tiếp nhắn tin (gọi thêm món, lấy thêm giấy, v.v.) tới nhân viên quản lý mà không cần phải gọi to hay chờ đợi.
 
-## 🛠️ Công nghệ sử dụng
+Sự khác biệt của UniTEA là **chú trọng vào trải nghiệm không rào cản**: Khách hàng không cần tải App, không cần đăng ký tài khoản. Chỉ cần quẹt QR là có thể chat ngay lập tức với cửa hàng theo thời gian thực (Realtime). 
 
-- **Framework**: [Next.js](https://nextjs.org) (v15+)
-- **Thư viện UI**: [React](https://react.dev) (v19)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com) (v3) + PostCSS + Autoprefixer
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Cơ sở dữ liệu & Xác thực**: [Supabase](https://supabase.com) (PostgreSQL, Auth, Storage, Realtime)
-- **Ngôn ngữ**: [TypeScript](https://www.typescriptlang.org/)
+---
 
-## 📂 Cấu trúc dự án
+## ✨ Chức năng Cốt lõi & Luồng Người dùng
 
-- `src/app`: Chứa các trang và layout theo kiến trúc App Router của Next.js.
-  - `/admin`: Trang quản trị (Dashboard, Quản lý Chat, Thực đơn).
-  - `/chat`: Giao diện chat cho khách hàng quét mã QR.
-- `src/components`: Các component React UI có thể tái sử dụng.
-- `src/lib`: Hàm tiện ích, Supabase clients (cho cả client và server), và helper.
-- `src/middleware.ts`: Middleware của Next.js để xử lý xác thực và bảo vệ các routes yêu cầu đăng nhập.
-- `supabase`: Các tệp cấu hình Supabase, migrations SQL (thiết lập schema, RLS, Storage, Realtime).
+### 1. Dành cho Khách hàng (Trải nghiệm Không ma sát)
+- **Truy cập ẩn danh**: Nhờ tính năng Supabase Anonymous Sign-in, khách hàng quét QR và có ngay một phiên (session) định danh dưới nền hệ thống mà không cần điền bất kỳ thông tin nào.
+- **Chat Realtime**: Nhắn tin với nhân viên và thấy phản hồi ngay lập tức, không cần làm mới trang.
+- **Đình kèm hình ảnh**: Cho phép gửi hình ảnh minh họa (ví dụ: ly nước bị thiếu topping) kích thước lên tới 5MB, xử lý qua Supabase Storage tiên tiến.
+- **Lưu trữ phiên (Session Persistence)**: Giữ thông tin cuộc trò chuyện ngay cả khi vô tình tắt trình duyệt hay reload trang nhờ cơ chế lưu ID trong `sessionStorage`.
+- **Bảo vệ mã QR**: QR code có giới hạn thời gian (mặc định 3 tiếng) nhằm tránh việc mã bị lan truyền ra ngoài ngoài khung giờ khách đang ngồi tại quán.
 
-## 💻 Hướng dẫn chạy dự án (Getting Started)
+### 2. Dành cho Nhân viên / Quản lý (Trang Admin Dashboard)
+- **Tạo mã QR tự động**: Quản lý có thể sinh ra mã QR cho từng phiên khách (Ví dụ: "Bàn 15", "Tầng 2 - Góc cửa sổ").
+- **Giao diện phân chia theo màn hình Split-pane**: Giúp nhân viên vừa theo dõi chi tiết danh sách bàn đang có yêu cầu (Panel trái) vừa phản hồi chat chi tiết (Panel phải). Có responsive tốt trên thiết bị di động.
+- **Cảnh báo phiên chờ (Pulse UI)**: Hiển thị nổi bật số lượng phiên chat đang mở cần xử lý.
+- **Chủ động đóng phiên chat**: Nhân viên có thể chốt/đóng kết nối khi đã phục vụ xong, giúp dọn dẹp các yêu cầu cũ khỏi luồng làm việc.
 
-### Yêu cầu hệ thống
+---
 
-- Node.js (phiên bản v18 trở lên)
-- npm, yarn, hoặc pnpm
-- Một dự án trên [Supabase](https://supabase.com/)
+## 🏛 Kiến trúc Hệ thống
 
-### Cài đặt
+UniTEA được phát triển dựa trên **Stack Serverless linh hoạt**:
 
-1. **Clone dự án:**
-   ```bash
-   git clone https://github.com/in4SECxMinDandy/UniTEA.git
-   cd UniTEA
-   ```
+- **Font-end**: [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://react.dev/), [Tailwind CSS 3](https://tailwindcss.com/).
+  - Tối ưu hóa UI/UX với `lucide-react` và các tiện ích như `tailwind-merge`/`clsx`.
+  - Phân quyền trang thông qua Middleware cấp độ Component (`RoleGate`, `AuthGate`).
+- **Back-end Serverless**: [Supabase](https://supabase.com) đảm trách toàn bộ trọng trách backend.
+  - **Database (PostgreSQL)**: Xây dựng các Table (Profiles, Chat Sessions, Chat Messages, Foods).
+  - **Auth**: Cấu hình xác thực với cả dạng Password (cho quản trị) và Anonymous (cho khách hàng).
+  - **Realtime**: Subscription cơ sở dữ liệu `postgres_changes` cho kênh Chat, kết hợp Fallback cơ chế Polling (5s) nếu websocket bị mất kết nối mạng.
+  - **Storage**: Tạo Bucket riêng biệt có định tuyến bảo vệ cấp Table thông qua RLS (Row Level Security).
+  - **Bảo mật RLS Toàn diện**: Áp dụng chặt chẽ cho từng hàng (Row) dựa vào `auth.uid()` hoặc hàm kiểm tra vai trò `has_role()`.
 
-2. **Cài đặt các gói phụ thuộc:**
-   ```bash
-   npm install
-   ```
+---
 
-3. **Cấu hình biến môi trường:**
-   Tạo một tệp `.env.local` ở thư mục gốc dựa trên `.env.example` và điền credentials Supabase của bạn:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-   ```
-   *Lưu ý: Để tính năng chat bằng QR hoạt động, cần bật "Anonymous Sign-ins" trong bảng phân quyền (Authentication > Providers) trên Supabase Dashboard.*
+## 📂 Tổ chức Thư mục & Mã nguồn
 
-4. **Chạy server phát triển:**
-   ```bash
-   npm run dev
-   ```
+```text
+UniTEA/
+├── src/
+│   ├── app/                      # Cấu trúc Route theo NextJS App Router
+│   │   ├── admin/                # Phân hệ Admin (Mã QR, Chat Panel, Quản lý món ăn)
+│   │   ├── chat/                 # Phân hệ Nhắn tin (Chứa ChatContent logic mạnh mẽ)
+│   │   ├── login/                # Route đăng nhập
+│   │   ├── ...                   # Các Route tĩnh khác (Trang chủ, v.v)
+│   ├── components/               # Giao diện đóng gói có thể dùng lại
+│   │   ├── admin/                # VD: AdminChatPanel.tsx, FoodFormModal.tsx
+│   │   ├── auth/                 # VD: RoleGate (bảo vệ các component chỉ dành cho Admin)
+│   │   ...
+│   ├── lib/
+│   │   └── supabase/             # Logic trích xuất Client Supabase (SSR & Browser)
+│   ├── middleware.ts             # Lớp middleware kiểm tra Auth/Cookie NextJS
+├── supabase/
+│   ├── migrations/               # Các script SQL từ v001 tới v009 quy định Schema và RLS
+│   └── config.toml               # Cấu hình Local Supabase CLI
+├── tailwind.config.ts            # Hệ thống design tokens và colors
+└── ...
+```
 
-5. Mở [http://localhost:3000](http://localhost:3000) trên trình duyệt để sử dụng ứng dụng.
-   - Truy cập `/admin` để vào trang tạo mã QR và quản lý chat (cần đăng nhập tài khoản ADMIN).
+---
 
-## 📜 Các lệnh kịch bản (Scripts)
+## 🛠 Hướng dẫn Triển khai & Phát triển Local
 
-- `npm run dev`: Chạy ứng dụng ở chế độ phát triển (development).
-- `npm run build`: Build ứng dụng để chuẩn bị triển khai lên môi trường production.
-- `npm run start`: Khởi chạy ứng dụng với bản build đã tạo (production).
-- `npm run lint`: Chạy ESLint để kiểm tra chất lượng code.
+### 1. Cài đặt ban đầu
 
-## 📝 Giấy phép (License)
+Cần chắc chắn bạn đã có sẵn tài khoản **Supabase** và máy tính có cài **Node.js 18+**, **Supabase CLI**.
 
-Dự án này là mã nguồn đóng và được sử dụng cho mục đích nội bộ.
+```bash
+# Clone dự án & Cài đặt gói NPM
+git clone https://github.com/in4SECxMinDandy/UniTEA.git
+cd UniTEA
+npm install
+```
+
+### 2. Thiết lập Supabase Project
+
+1. Tạo một project trên Supabase.com
+2. Ở phần **Authentication -> Configuration -> Providers**, bạn tìm và **BẬT (Enable) "Anonymous Sign-ins"**. (Tính năng sống còn cho QR Code Chat).
+3. Đăng nhập Supabase CLI vào project để đẩy các lược đồ (Schema) lên base mới:
+```bash
+npx supabase login
+npx supabase link --project-ref [YOUR_PROJECT_ID]
+npx supabase db push
+```
+*(Thao tác `db push` sẽ tự khởi tạo Tables, RLS, Storage Buckets, Roles và kích hoạt Realtime cho bạn nhờ thư mục `migrations` có sẵn.)*
+
+### 3. Biến môi trường
+
+Đổi tên tệp `.env.example` thành `.env.local` và cài đặt 2 biến số:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://[YOUR_PROJECT_ID].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[YOUR_ANON_KEY_HERE]
+```
+
+### 4. Chạy dự án
+
+```bash
+npm run dev
+```
+
+Truy cập hệ thống ở [http://localhost:3000](http://localhost:3000).
+
+*Ghi chú nhỏ: Hãy dùng trình duyệt để Signup một account, sau đó trên Supabase Editor (Web), chèn tay dòng User Profile đó thành Role **`STORE_ADMIN`** thông qua Table `user_roles` để có quyền cao nhất truy cập `/admin`.*
+
+---
+
+## 📝 Giấy phép
+
+Được triển khai độc quyền dưới tư cách dự án nội bộ. Vui lòng liên hệ nhóm phát triển trước khi sao chép và thương mại hoá. Thay đổi và phát triển bởi [in4SECxMinDandy].
