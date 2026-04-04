@@ -93,7 +93,7 @@ BEGIN
   NEW.updated_at = now();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER foods_updated_at
   BEFORE UPDATE ON foods
@@ -110,7 +110,7 @@ BEGIN
   NEW.deleted_at = now();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER foods_soft_delete
   BEFORE DELETE ON foods
@@ -143,7 +143,7 @@ BEGIN
   NEW.expires_at = NEW.started_at + (NEW.expires_in_hours || ' hours')::interval;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER visit_session_auto_expires
   BEFORE INSERT ON visit_sessions
@@ -186,7 +186,7 @@ BEGIN
   UPDATE chat_sessions SET last_message_at = NEW.created_at WHERE id = NEW.session_id;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 CREATE TRIGGER chat_messages_new_message
   AFTER INSERT ON chat_messages
@@ -202,7 +202,7 @@ RETURNS boolean AS $$
     JOIN roles r ON r.id = ur.role_id
     WHERE ur.user_id = uid AND r.name = role_name
   );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
 
 CREATE OR REPLACE FUNCTION public.has_valid_visit_session(uid uuid)
 RETURNS boolean AS $$
@@ -212,7 +212,7 @@ RETURNS boolean AS $$
       AND is_active = true
       AND expires_at > now()
   );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
 
 -- ============================================================
 -- AUTO-CREATE PROFILE ON SIGNUP
@@ -226,7 +226,7 @@ BEGIN
   SELECT NEW.id, id FROM public.roles WHERE name = 'USER';
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
