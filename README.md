@@ -1,323 +1,129 @@
-# UniTEA - Trà Sữa Thức Giấc
+<div align="center">
+  <img src="https://cmstest.lottemallwestlakehanoi.vn/storage/tenants/195/727909eb2bc36eb272c37e21458677a184601520.png" alt="UniTEA Logo" width="120" height="120" />
+  <h1>UniTEA - Nền tảng Nâng Tầm Trải Nghiệm Khách Hàng F&B</h1>
+  <p>Giải pháp tối ưu hóa thao tác gọi món, phản hồi và chăm sóc khách hàng dựa trên QR Code, dành riêng cho các mô hình cà phê, trà sữa, và nhà hàng cỡ vừa và nhỏ.</p>
+</div>
 
-> Hệ thống quản lý cửa hàng F&B trực tuyến với trải nghiệm đặt hàng realtime, live chat qua QR và quản trị toàn diện.
+<br/>
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![React](https://img.shields.io/badge/React-19-61dafb)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38bdf8)
-![Supabase](https://img.shields.io/badge/Supabase-BaaS-3ecf8e)
+## 🎯 Tầm nhìn dự án
 
-## 📋 Giới thiệu
+UniTEA được thiết kế để giải quyết bài toán giao tiếp giữa khách hàng và nhân viên trong một cửa hàng F&B có diện tích hoặc số luợng bàn lớn. Bằng cách sử dụng mã QR duy nhất cho từng bàn, khách hàng có thể quét để trực tiếp nhắn tin (gọi thêm món, lấy thêm giấy, v.v.) tới nhân viên quản lý mà không cần phải gọi to hay chờ đợi.
 
-**UniTEA** là nền tảng quản lý cửa hàng đồ uống và thức ăn trực tuyến, được thiết kế dành cho các quán café, trà sữa và mô hình F&B nói chung. Dự án mang đến:
+Sự khác biệt của UniTEA là **chú trọng vào trải nghiệm không rào cản**: Khách hàng không cần tải App, không cần đăng ký tài khoản. Chỉ cần quẹt QR là có thể chat ngay lập tức với cửa hàng theo thời gian thực (Realtime). 
 
-- **Khách hàng:** Trải nghiệm xem menu, đặt hàng, theo dõi đơn hàng realtime và trò chuyện trực tiếp với nhân viên qua mã QR tại bàn.
-- **Quản trị viên:** Bộ công cụ quản lý toàn diện từ thực đơn, danh mục, đơn hàng, kho hàng đến live chat và tạo mã QR bàn.
+---
 
-## ✨ Tính năng
+## ✨ Chức năng Cốt lõi & Luồng Người dùng
 
-### 🧑‍💻 Khách hàng
+### 1. Dành cho Khách hàng (Trải nghiệm Không ma sát)
+- **Truy cập ẩn danh**: Nhờ tính năng Supabase Anonymous Sign-in, khách hàng quét QR và có ngay một phiên (session) định danh dưới nền hệ thống mà không cần điền bất kỳ thông tin nào.
+- **Chat Realtime**: Nhắn tin với nhân viên và thấy phản hồi ngay lập tức, không cần làm mới trang.
+- **Đình kèm hình ảnh**: Cho phép gửi hình ảnh minh họa (ví dụ: ly nước bị thiếu topping) kích thước lên tới 5MB, xử lý qua Supabase Storage tiên tiến.
+- **Lưu trữ phiên (Session Persistence)**: Giữ thông tin cuộc trò chuyện ngay cả khi vô tình tắt trình duyệt hay reload trang nhờ cơ chế lưu ID trong `sessionStorage`.
+- **Bảo vệ mã QR**: QR code có giới hạn thời gian (mặc định 3 tiếng) nhằm tránh việc mã bị lan truyền ra ngoài ngoài khung giờ khách đang ngồi tại quán.
 
-| Tính năng | Mô tả |
-|---|---|
-| **Xem menu** | Duyệt sản phẩm theo danh mục, xem chi tiết hình ảnh, giá cả |
-| **Đặt hàng** | Chọn số lượng, ghi chú, đặt hàng trực tiếp từ trang chi tiết |
-| **Theo dõi đơn hàng** | Cập nhật trạng thái realtime (Chờ → Xác nhận → Hoàn thành / Hủy) |
-| **Live Chat qua QR** | Quét QR tại bàn → trò chuyện ẩn danh với nhân viên, hỗ trợ gửi ảnh |
-| **Đăng ký / Đăng nhập** | Email/mật khẩu, hỗ trợ Cloudflare Turnstile CAPTCHA |
+### 2. Dành cho Nhân viên / Quản lý (Trang Admin Dashboard)
+- **Tạo mã QR tự động**: Quản lý có thể sinh ra mã QR cho từng phiên khách (Ví dụ: "Bàn 15", "Tầng 2 - Góc cửa sổ").
+- **Giao diện phân chia theo màn hình Split-pane**: Giúp nhân viên vừa theo dõi chi tiết danh sách bàn đang có yêu cầu (Panel trái) vừa phản hồi chat chi tiết (Panel phải). Có responsive tốt trên thiết bị di động.
+- **Cảnh báo phiên chờ (Pulse UI)**: Hiển thị nổi bật số lượng phiên chat đang mở cần xử lý.
+- **Chủ động đóng phiên chat**: Nhân viên có thể chốt/đóng kết nối khi đã phục vụ xong, giúp dọn dẹp các yêu cầu cũ khỏi luồng làm việc.
 
-### 👨‍💼 Quản trị viên
+---
 
-| Tính năng | Mô tả |
-|---|---|
-| **Dashboard** | Tổng quan, tạo mã QR bàn, quản lý phiên truy cập |
-| **Quản lý thực đơn** | CRUD sản phẩm, upload ảnh, tìm kiếm, lọc, sắp xếp, soft-delete |
-| **Quản lý danh mục** | Thêm/sửa danh mục, sắp xếp thứ tự, bật/tắt |
-| **Quản lý đơn hàng** | Xem danh sách, lọc trạng thái, xác nhận/từ chối/hoàn thành |
-| **Live Chat Panel** | Giao diện 2 panel, quản lý hội thoại realtime, gửi/nhận ảnh |
-| **Tự động quản lý kho** | Trigger tự trừ kho khi đặt, hoàn kho khi hủy đơn |
-| **Phân quyền RLS** | Row Level Security — khách chỉ thấy dữ liệu của mình, admin truy cập đầy đủ |
+## 🏛 Kiến trúc Hệ thống
 
-## 🛠️ Công nghệ
+UniTEA được phát triển dựa trên **Stack Serverless linh hoạt**:
 
-| Hạng mục | Công nghệ |
-|---|---|
-| **Frontend Framework** | Next.js 15 (App Router) |
-| **UI Library** | React 19 |
-| **Ngôn ngữ** | TypeScript |
-| **Styling** | Tailwind CSS 3.4 |
-| **Icons** | Lucide React |
-| **QR Code** | qrcode.react |
-| **Backend / BaaS** | Supabase (PostgreSQL) |
-| **Authentication** | Supabase Auth (email/password + anonymous) |
-| **Realtime** | Supabase Realtime (WebSockets) |
-| **Storage** | Supabase Storage Buckets (food-images, chat-images) |
-| **CAPTCHA** | Cloudflare Turnstile (optional) |
-| **Utility** | clsx, tailwind-merge, nanoid |
+- **Font-end**: [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://react.dev/), [Tailwind CSS 3](https://tailwindcss.com/).
+  - Tối ưu hóa UI/UX với `lucide-react` và các tiện ích như `tailwind-merge`/`clsx`.
+  - Phân quyền trang thông qua Middleware cấp độ Component (`RoleGate`, `AuthGate`).
+- **Back-end Serverless**: [Supabase](https://supabase.com) đảm trách toàn bộ trọng trách backend.
+  - **Database (PostgreSQL)**: Xây dựng các Table (Profiles, Chat Sessions, Chat Messages, Foods).
+  - **Auth**: Cấu hình xác thực với cả dạng Password (cho quản trị) và Anonymous (cho khách hàng).
+  - **Realtime**: Subscription cơ sở dữ liệu `postgres_changes` cho kênh Chat, kết hợp Fallback cơ chế Polling (5s) nếu websocket bị mất kết nối mạng.
+  - **Storage**: Tạo Bucket riêng biệt có định tuyến bảo vệ cấp Table thông qua RLS (Row Level Security).
+  - **Bảo mật RLS Toàn diện**: Áp dụng chặt chẽ cho từng hàng (Row) dựa vào `auth.uid()` hoặc hàm kiểm tra vai trò `has_role()`.
 
-## 📁 Cấu trúc dự án
+---
 
-```
+## 📂 Tổ chức Thư mục & Mã nguồn
+
+```text
 UniTEA/
 ├── src/
-│   ├── app/                          # Next.js App Router
-│   │   ├── layout.tsx                # Root layout (Header + Footer)
-│   │   ├── page.tsx                  # Trang chủ (Hero + Featured)
-│   │   ├── globals.css               # Global styles
-│   │   ├── error.tsx                 # Error boundary
-│   │   ├── loading.tsx               # Loading component
-│   │   │
-│   │   ├── login/page.tsx            # Đăng ký / Đăng nhập khách hàng
-│   │   ├── adminlogin/page.tsx       # Đăng nhập quản trị viên
-│   │   │
-│   │   ├── thuc-pham/                # Menu thực phẩm
-│   │   │   ├── page.tsx              # Danh sách + lọc danh mục
-│   │   │   └── [slug]/page.tsx       # Chi tiết + form đặt hàng
-│   │   │
-│   │   ├── history/page.tsx          # Lịch sử đơn hàng (realtime)
-│   │   ├── chat/                     # Live Chat khách hàng
-│   │   │   ├── page.tsx
-│   │   │   └── ChatContent.tsx
-│   │   ├── gioi-thieu/page.tsx       # Trang giới thiệu
-│   │   │
-│   │   ├── admin/                    # Panel quản trị (role-gated)
-│   │   │   ├── layout.tsx
-│   │   │   ├── page.tsx              # Dashboard (QR + Sessions)
-│   │   │   ├── foods/page.tsx        # CRUD thực đơn
-│   │   │   ├── categories/page.tsx   # Quản lý danh mục
-│   │   │   ├── orders/page.tsx       # Quản lý đơn hàng
-│   │   │   └── chat/page.tsx         # Live Chat Panel
-│   │   │
-│   │   └── api/debug/log/route.ts    # Debug API
-│   │
-│   ├── components/
-│   │   ├── layout/
-│   │   │   ├── Header.tsx
-│   │   │   └── Footer.tsx
-│   │   ├── food/
-│   │   │   ├── FoodCard.tsx
-│   │   │   └── OrderForm.tsx
-│   │   ├── admin/
-│   │   │   ├── FoodFormModal.tsx
-│   │   │   └── AdminChatPanel.tsx
-│   │   └── auth/
-│   │       ├── TurnstileBox.tsx
-│   │       └── RoleGate.tsx
-│   │
-│   └── lib/
-│       ├── types.ts                  # TypeScript interfaces
-│       ├── utils.ts                  # Utilities (cn, formatPrice, formatTime)
-│       └── supabase/
-│           ├── client.ts             # Browser Supabase client
-│           └── server.ts             # Server-side Supabase client
-│
+│   ├── app/                      # Cấu trúc Route theo NextJS App Router
+│   │   ├── admin/                # Phân hệ Admin (Mã QR, Chat Panel, Quản lý món ăn)
+│   │   ├── chat/                 # Phân hệ Nhắn tin (Chứa ChatContent logic mạnh mẽ)
+│   │   ├── login/                # Route đăng nhập
+│   │   ├── ...                   # Các Route tĩnh khác (Trang chủ, v.v)
+│   ├── components/               # Giao diện đóng gói có thể dùng lại
+│   │   ├── admin/                # VD: AdminChatPanel.tsx, FoodFormModal.tsx
+│   │   ├── auth/                 # VD: RoleGate (bảo vệ các component chỉ dành cho Admin)
+│   │   ...
+│   ├── lib/
+│   │   └── supabase/             # Logic trích xuất Client Supabase (SSR & Browser)
+│   ├── middleware.ts             # Lớp middleware kiểm tra Auth/Cookie NextJS
 ├── supabase/
-│   ├── migrations/                   # 17 migrations (001-017)
-│   ├── config.toml
-│   └── seed.sql                      # Dữ liệu mẫu
-│
-├── public/                           # Static assets
-├── package.json
-├── next.config.mjs
-├── tailwind.config.ts
-├── tsconfig.json
-├── eslint.config.mjs
-├── postcss.config.js
-├── .env.example                      # Mẫu biến môi trường
-└── README.md
+│   ├── migrations/               # Các script SQL từ v001 tới v009 quy định Schema và RLS
+│   └── config.toml               # Cấu hình Local Supabase CLI
+├── tailwind.config.ts            # Hệ thống design tokens và colors
+└── ...
 ```
 
-## 🗄️ Cơ sở dữ liệu
+---
 
-### Bảng dữ liệu
+## 🛠 Hướng dẫn Triển khai & Phát triển Local
 
-| Bảng | Mô tả |
-|---|---|
-| `roles` | Định nghĩa vai trò (`STORE_ADMIN`, `USER`) |
-| `profiles` | Hồ sơ người dùng, liên kết `auth.users(id)` |
-| `user_roles` | Ánh xạ user ↔ role (many-to-many) |
-| `food_categories` | Danh mục sản phẩm (tên, slug, ảnh, thứ tự, trạng thái) |
-| `foods` | Sản phẩm (tên, slug, mô tả, giá, ảnh, kho, danh mục, soft-delete) |
-| `visit_sessions` | Phiên truy cập QR (token, nhãn bàn, thời gian hết hạn, trạng thái) |
-| `chat_sessions` | Phiên trò chuyện (liên kết user + visit session, trạng thái) |
-| `chat_messages` | Tin nhắn (session_id, người gửi, nội dung, ảnh, đã đọc) |
-| `orders` | Đơn hàng (user, sản phẩm, số lượng, ghi chú, tổng tiền, trạng thái) |
+### 1. Cài đặt ban đầu
 
-### Database Functions & Triggers
-
-| Function / Trigger | Chức năng |
-|---|---|
-| `has_role(uid, role_name)` | Kiểm tra vai trò người dùng |
-| `has_valid_visit_session(uid)` | Kiểm tra phiên QR hợp lệ |
-| `handle_new_user()` | Tự tạo profile + gán `USER` role khi đăng ký |
-| `update_updated_at()` | Tự cập nhật timestamp khi sửa food/profile |
-| `set_deleted_at()` | Soft-delete foods |
-| `set_visit_expires_at()` | Tự tính thời gian hết hạn phiên QR |
-| `update_chat_session_last_message()` | Cập nhật `last_message_at` khi có tin mới |
-| `handle_order_stock()` | **Trigger:** Tự trừ kho khi đặt, hoàn kho khi hủy |
-
-### Storage Buckets
-
-| Bucket | Mô tả | Giới hạn |
-|---|---|---|
-| `food-images` | Ảnh sản phẩm thực đơn | Public |
-| `chat-images` | Ảnh đính kèm tin nhắn chat | 5MB, Public |
-
-### Security
-
-Tất cả bảng đều bật **Row Level Security (RLS)** với policies đảm bảo:
-- Người dùng chỉ truy cập dữ liệu của chính mình
-- `STORE_ADMIN` có quyền truy cập toàn bộ
-- Khách ẩn danh chỉ truy cập chat session tương ứng với QR đã quét
-
-## 🚀 Cài đặt & Chạy dự án
-
-### Yêu cầu
-
-- Node.js 18+
-- npm / yarn / pnpm
-- Tài khoản Supabase (hoặc Supabase local)
-
-### 1. Clone dự án
+Cần chắc chắn bạn đã có sẵn tài khoản **Supabase** và máy tính có cài **Node.js 18+**, **Supabase CLI**.
 
 ```bash
+# Clone dự án & Cài đặt gói NPM
 git clone https://github.com/in4SECxMinDandy/UniTEA.git
 cd UniTEA
-```
-
-### 2. Cài đặt dependencies
-
-```bash
 npm install
 ```
 
-### 3. Cấu hình môi trường
+### 2. Thiết lập Supabase Project
 
-Tạo file `.env.local` từ `.env.example`:
-
+1. Tạo một project trên Supabase.com
+2. Ở phần **Authentication -> Configuration -> Providers**, bạn tìm và **BẬT (Enable) "Anonymous Sign-ins"**. (Tính năng sống còn cho QR Code Chat).
+3. Đăng nhập Supabase CLI vào project để đẩy các lược đồ (Schema) lên base mới:
 ```bash
-cp .env.example .env.local
-```
-
-Điền thông tin Supabase:
-
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-
-# Cloudflare Turnstile (optional)
-NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-turnstile-site-key
-```
-
-> **Lấy thông tin Supabase:** Vào Supabase Dashboard → Project Settings → API
-
-### 4. Chạy migrations
-
-```bash
-# Nếu dùng Supabase CLI
+npx supabase login
+npx supabase link --project-ref [YOUR_PROJECT_ID]
 npx supabase db push
+```
+*(Thao tác `db push` sẽ tự khởi tạo Tables, RLS, Storage Buckets, Roles và kích hoạt Realtime cho bạn nhờ thư mục `migrations` có sẵn.)*
 
-# Hoặc chạy thủ công qua SQL Editor trong Supabase Dashboard
-# Copy nội dung các file trong supabase/migrations/ và chạy theo thứ tự
+### 3. Biến môi trường
+
+Đổi tên tệp `.env.example` thành `.env.local` và cài đặt 2 biến số:
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://[YOUR_PROJECT_ID].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[YOUR_ANON_KEY_HERE]
 ```
 
-### 5. Khởi chạy development server
+### 4. Chạy dự án
 
 ```bash
 npm run dev
 ```
 
-Mở trình duyệt, truy cập [http://localhost:3000](http://localhost:3000)
+### 5. Demo
 
-## 🗺️ Sơ đồ routes
+<img width="2553" height="1355" alt="image" src="https://github.com/user-attachments/assets/bf1863b8-332f-43e0-a769-f54d6a12a3f6" />  <img width="2559" height="1351" alt="image" src="https://github.com/user-attachments/assets/bf742c56-2e5e-4a3d-8e09-36e552b410e8" /> <img width="2559" height="1354" alt="image" src="https://github.com/user-attachments/assets/4abd6127-db38-4276-99b0-456fbd6e6f85" /> <img width="2559" height="1356" alt="image" src="https://github.com/user-attachments/assets/c0aeb0cd-3e74-48bf-89dd-3f0ce1c3836a" /> <img width="2559" height="1352" alt="image" src="https://github.com/user-attachments/assets/3d6a9390-c55e-4939-ac94-33cc74c4985f" /> <img width="2559" height="1358" alt="image" src="https://github.com/user-attachments/assets/016ef7a9-6d0e-43d4-be2d-3bc0073abf3b" />
 
-| Route | Truy cập | Mô tả |
-|---|---|---|
-| `/` | Public | Trang chủ — Hero + sản phẩm nổi bật |
-| `/gioi-thieu` | Public | Trang giới thiệu cửa hàng |
-| `/thuc-pham` | Public | Menu — danh sách + lọc theo danh mục |
-| `/thuc-pham/[slug]` | Public | Chi tiết sản phẩm + form đặt hàng |
-| `/login` | Public | Đăng ký / Đăng nhập khách hàng |
-| `/history` | Authenticated | Lịch sử đơn hàng (realtime) |
-| `/chat` | Auth / Anonymous (QR) | Live chat với nhân viên |
-| `/adminlogin` | Public | Đăng nhập quản trị viên |
-| `/admin` | `STORE_ADMIN` | Dashboard — tạo QR, quản lý phiên |
-| `/admin/foods` | `STORE_ADMIN` | CRUD thực đơn |
-| `/admin/categories` | `STORE_ADMIN` | Quản lý danh mục |
-| `/admin/orders` | `STORE_ADMIN` | Quản lý đơn hàng |
-| `/admin/chat` | `STORE_ADMIN` | Live Chat Panel |
 
-## 📦 Scripts
 
-| Command | Mô tả |
-|---|---|
-| `npm run dev` | Chạy development server (port 3000) |
-| `npm run build` | Build production |
-| `npm run start` | Chạy production server |
-| `npm run lint` | Chạy ESLint kiểm tra code |
+Truy cập hệ thống ở [http://localhost:3000](http://localhost:3000).
 
-## 🔐 Phân quyền
-
-```
-┌─────────────────────────────────────────────────┐
-│                  STORE_ADMIN                     │
-│  ┌───────────────────────────────────────────┐  │
-│  │  Dashboard / QR / Sessions                │  │
-│  │  CRUD Foods & Categories                  │  │
-│  │  Quản lý đơn hàng                         │  │
-│  │  Live Chat Panel                          │  │
-│  │  Xem toàn bộ dữ liệu                      │  │
-│  └───────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────┐
-│                     USER                        │
-│  ┌───────────────────────────────────────────┐  │
-│  │  Xem menu, đặt hàng                       │  │
-│  │  Theo dõi đơn hàng của mình               │  │
-│  │  Lịch sử đơn hàng                         │  │
-│  └───────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────┐
-│                ANONYMOUS (QR Guest)              │
-│  ┌───────────────────────────────────────────┐  │
-│  │  Quét QR → Chat với nhân viên             │  │
-│  │  Không cần tài khoản                      │  │
-│  │  Phiên bị khóa nếu admin dừng session     │  │
-│  └───────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────┘
-```
-
-## 🔄 Luồng nghiệp vụ
-
-### Đặt hàng & Quản lý kho
-
-```
-1. Khách chọn sản phẩm → Đặt hàng (số lượng, ghi chú)
-2. Đơn hàng tạo → Trigger tự động trừ kho
-3. Trạng thái: pending → confirmed → completed
-4. Nếu admin từ chối (cancelled) → Trigger hoàn kho
-```
-
-### Live Chat qua QR
-
-```
-1. Admin tạo QR code cho bàn → Khách quét
-2. Hệ thống tạo anonymous session + chat session
-3. Khách nhắn tin (text + ảnh)
-4. Admin nhận tin nhắn tại /admin/chat → Phản hồi
-5. Admin có thể dừng phiên → Khách không thể nhắn tiếp
-```
-
-## 📝 License
-
-Dự án mã nguồn mở, sử dụng cho mục đích học tập và thương mại.
+*Ghi chú nhỏ: Hãy dùng trình duyệt để Signup một account, sau đó trên Supabase Editor (Web), chèn tay dòng User Profile đó thành Role **`STORE_ADMIN`** thông qua Table `user_roles` để có quyền cao nhất truy cập `/admin`.*
 
 ---
 
-<p align="center">
-  <em>UniTEA — Kết nối khách hàng & cửa hàng F&B theo cách thông minh hơn.</em>
-</p>
+## 📝 Giấy phép
+
+Được triển khai độc quyền dưới tư cách dự án nội bộ. Vui lòng liên hệ nhóm phát triển trước khi sao chép và thương mại hoá. Thay đổi và phát triển bởi [in4SECxMinDandy].
