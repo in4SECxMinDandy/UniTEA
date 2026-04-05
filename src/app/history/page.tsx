@@ -40,7 +40,7 @@ export default function OrderHistoryPage() {
       
       fetchOrders()
 
-      const channel = supabase.channel('user-orders-history')
+      const channel = supabase.channel(`user-orders-history-${session.user.id}-${Date.now()}`)
         .on('postgres_changes', 
           { event: '*', schema: 'public', table: 'orders', filter: `user_id=eq.${session.user.id}` }, 
           () => { fetchOrders() }
