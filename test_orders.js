@@ -6,22 +6,20 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-async function checkOrders() {
+async function checkSessions() {
   const { data, error } = await supabase
-    .from('orders')
-    .select(`
-      *,
-      profiles!orders_user_id_fkey(full_name),
-      food:foods(name, price)
-    `)
+    .from('visit_sessions')
+    .select('*, admin:profiles!visit_sessions_user_id_fkey(full_name)')
     .order('created_at', { ascending: false })
+    .limit(50)
 
   console.log('Error:', error);
-  console.log('Orders:', data);
+  console.log('Length:', data && data.length);
   
-  // also get just raw orders without profiles to be sure
-  const { data: rawData } = await supabase.from('orders').select('*');
-  console.log('Raw Orders:', rawData);
+  if (error) {
+    const { data: raw, error: rawError } = await supabase.from('visit_sessions').select('*');
+    console.log('Raw:', raw);
+  }
 }
 
-checkOrders();
+checkSessions();

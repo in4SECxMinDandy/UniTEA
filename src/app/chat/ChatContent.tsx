@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useSearchParams } from 'next/navigation'
-import { Send, MessageCircle, Loader2, QrCode, ImagePlus, X } from 'lucide-react'
+import { MessageCircle, Send, ImagePlus, Loader2, X, QrCode, Ban } from 'lucide-react'
 import Image from 'next/image'
 
 interface Message {
@@ -226,6 +226,31 @@ function ChatContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.id, fetchMessages])
+
+  // Listen to chat_session status changes (e.g. if Admin closes it remotely)
+  useEffect(() => {
+    if (!session?.id) return
+
+    const sessionChannel = supabase
+      .channel(`chat-session-status-${session.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_sessions',
+          filter: `id=eq.${session.id}`,
+        },
+        (payload) => {
+          setSession(payload.new as unknown as ChatSession)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(sessionChannel)
+    }
+  }, [session?.id])
 
   // ── Polling fallback (every 5s if realtime is unreliable) ────────────────
   useEffect(() => {
@@ -508,71 +533,83 @@ function ChatContent() {
         )}
 
         {/* Input */}
-        <div className="border-t border-border-subtle p-4 bg-surface-card">
-          <div className="flex gap-2 items-end">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              className="hidden"
-              onChange={handleImageSelect}
-              id="chat-image-input"
-            />
-            <label
-              htmlFor="chat-image-input"
-              className={`
-                flex items-center justify-center w-[48px] h-[48px] rounded-xl border border-border-subtle
-                cursor-pointer transition-colors shrink-0
-                ${imageFile ? 'bg-accent-green-light border-accent-green text-accent-green' : 'bg-surface-card text-text-muted hover:bg-gray-100'}
-              `}
-              title="Đính kèm ảnh"
-            >
-              {uploadProgress ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <ImagePlus size={18} />
-              )}
-            </label>
-
-            <div className="flex-1 relative">
-              <textarea
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    sendMessage()
-                  }
-                }}
-                placeholder={imageFile ? 'Thêm chú thích cho ảnh (tuỳ chọn)...' : 'Nhập tin nhắn...'}
-                className="input-field resize-none pr-4 py-3 min-h-[48px] max-h-[120px]"
-                rows={1}
-                disabled={sending}
-                style={{ height: 'auto', overflowY: 'auto' }}
-                onInput={(e) => {
-                  const target = e.target as HTMLTextAreaElement
-                  target.style.height = 'auto'
-                  target.style.height = Math.min(target.scrollHeight, 120) + 'px'
-                }}
-              />
+        {session.status === 'closed' ? (
+          <div className="border-t border-border-subtle p-6 bg-surface-card text-center">
+            <div className="inline-flex items-center justify-center p-3 rounded-full bg-accent-red-light text-accent-red mb-3">
+              <Ban size={20} />
             </div>
-            <button
-              onClick={sendMessage}
-              disabled={sending || (!input.trim() && !imageFile)}
-              className="btn-primary flex items-center gap-2 h-[48px] px-5 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-              aria-label="Gửi tin nhắn"
-            >
-              {sending ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <Send size={18} />
-              )}
-            </button>
+            <p className="text-sm font-medium text-primary">Phiên chat đã kết thúc</p>
+            <p className="text-xs text-text-muted mt-1">
+              Nhân viên đã đóng phiên hỗ trợ này. Cảm ơn bạn đã liên hệ!
+            </p>
           </div>
-          <p className="text-[10px] text-text-muted mt-2 text-center">
-            Nhấn Enter để gửi · Shift+Enter để xuống dòng · Đính kèm ảnh tối đa 5MB
-          </p>
-        </div>
+        ) : (
+          <div className="border-t border-border-subtle p-4 bg-surface-card">
+            <div className="flex gap-2 items-end">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleImageSelect}
+                id="chat-image-input"
+              />
+              <label
+                htmlFor="chat-image-input"
+                className={`
+                  flex items-center justify-center w-[48px] h-[48px] rounded-xl border border-border-subtle
+                  cursor-pointer transition-colors shrink-0
+                  ${imageFile ? 'bg-accent-green-light border-accent-green text-accent-green' : 'bg-surface-card text-text-muted hover:bg-gray-100'}
+                `}
+                title="Đính kèm ảnh"
+              >
+                {uploadProgress ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <ImagePlus size={18} />
+                )}
+              </label>
+  
+              <div className="flex-1 relative">
+                <textarea
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      sendMessage()
+                    }
+                  }}
+                  placeholder={imageFile ? 'Thêm chú thích cho ảnh (tuỳ chọn)...' : 'Nhập tin nhắn...'}
+                  className="input-field resize-none pr-4 py-3 min-h-[48px] max-h-[120px]"
+                  rows={1}
+                  disabled={sending}
+                  style={{ height: 'auto', overflowY: 'auto' }}
+                  onInput={(e) => {
+                    const target = e.target as HTMLTextAreaElement
+                    target.style.height = 'auto'
+                    target.style.height = Math.min(target.scrollHeight, 120) + 'px'
+                  }}
+                />
+              </div>
+              <button
+                onClick={sendMessage}
+                disabled={sending || (!input.trim() && !imageFile)}
+                className="btn-primary flex items-center gap-2 h-[48px] px-5 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                aria-label="Gửi tin nhắn"
+              >
+                {sending ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Send size={18} />
+                )}
+              </button>
+            </div>
+            <p className="text-[10px] text-text-muted mt-2 text-center">
+              Nhấn Enter để gửi · Shift+Enter để xuống dòng · Đính kèm ảnh tối đa 5MB
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

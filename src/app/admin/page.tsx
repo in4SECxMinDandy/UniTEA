@@ -11,7 +11,7 @@ interface VisitSession {
   table_label: string | null
   is_active: boolean
   expires_at: string
-  created_at: string
+  started_at: string
   admin: { full_name: string } | null
   _count?: { chat_sessions: number }
 }
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
     const { data } = await supabase
       .from('visit_sessions')
       .select('*, admin:profiles!visit_sessions_user_id_fkey(full_name)')
-      .order('created_at', { ascending: false })
+      .order('started_at', { ascending: false })
       .limit(50)
     if (data) setSessions(data as unknown as VisitSession[])
     setSessionsLoading(false)
@@ -67,6 +67,7 @@ export default function AdminDashboard() {
     if (!error) {
       setToken(visitToken)
       setCreated(true)
+      await loadSessions() // Cập nhật ngay lập tức vào danh sách
     }
     setLoading(false)
   }
@@ -82,9 +83,12 @@ export default function AdminDashboard() {
   }
 
   async function disableSession(id: string) {
-    if (!confirm('Vô hiệu hoá phiên này?')) return
+    if (!confirm('Dừng phiên này? Mã QR và Link sẽ không còn hiệu lực.')) return
+    // Tắt phiên QR
     await supabase.from('visit_sessions').update({ is_active: false }).eq('id', id)
-    loadSessions()
+    // Đồng thời đóng tất cả các chat_sessions liên kết với phiên QR này
+    await supabase.from('chat_sessions').update({ status: 'closed' }).eq('visit_session_id', id)
+    await loadSessions()
   }
 
   async function deleteSession(id: string) {
@@ -283,7 +287,7 @@ export default function AdminDashboard() {
                       {/* Created */}
                       <div className="md:col-span-2 flex items-center">
                         <span className="text-xs text-text-muted">
-                          {new Date(s.created_at).toLocaleString('vi-VN', {
+                          {new Date(s.started_at).toLocaleString('vi-VN', {
                             day: '2-digit', month: '2-digit', year: '2-digit',
                           })}
                         </span>
@@ -316,10 +320,11 @@ export default function AdminDashboard() {
                         {status === 'hoạt-động' && (
                           <button
                             onClick={() => disableSession(s.id)}
-                            className="w-7 h-7 flex items-center justify-center rounded-lg text-text-muted hover:text-accent-amber hover:bg-amber-50 cursor-pointer transition-colors duration-150"
-                            title="Vô hiệu hoá"
+                            className="h-7 px-2 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-accent-red hover:bg-accent-red-light/30 border border-accent-red/20 cursor-pointer transition-colors duration-150"
+                            title="Dừng phiên này"
                           >
-                            <Ban size={13} />
+                            <Ban size={12} />
+                            Dừng
                           </button>
                         )}
                         <button
