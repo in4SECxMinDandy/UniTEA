@@ -166,7 +166,7 @@ export default function LoginPage() {
         })
         // #endregion
         if (error) throw error
-        router.push('/')
+        window.location.href = '/'
       }
     } catch (err: unknown) {
       const msg = formatAuthFailureMessage(err)

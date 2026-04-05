@@ -4,8 +4,26 @@ import FoodCard from '@/components/food/FoodCard'
 import { UtensilsCrossed, ArrowRight } from 'lucide-react'
 import type { Food, Category } from '@/lib/types'
 
-export default async function FoodsPage() {
+type PageProps = {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function FoodsPage(props: PageProps) {
+  const searchParams = await props.searchParams
+  const categoryId = searchParams?.category as string | undefined
+
   const supabase = await createClient()
+
+  let foodQuery = supabase
+    .from('foods')
+    .select('*, category:food_categories(name)')
+    .eq('is_available', true)
+    .is('deleted_at', null)
+    .order('sort_order', { ascending: true })
+
+  if (categoryId) {
+    foodQuery = foodQuery.eq('category_id', categoryId)
+  }
 
   const [{ data: categories }, { data: foods }] = await Promise.all([
     supabase
@@ -13,12 +31,7 @@ export default async function FoodsPage() {
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true }),
-    supabase
-      .from('foods')
-      .select('*, category:food_categories(name)')
-      .eq('is_available', true)
-      .is('deleted_at', null)
-      .order('sort_order', { ascending: true }),
+    foodQuery,
   ])
 
   return (
@@ -38,22 +51,39 @@ export default async function FoodsPage() {
       {/* Category pills */}
       {categories && categories.length > 0 && (
         <div className="flex gap-2 flex-wrap mb-10">
-          {(categories as unknown as Category[]).map((cat, idx) => (
-            <button
-              key={cat.id}
-              className="
-                px-4 py-2 rounded-full text-sm font-medium cursor-pointer
-                border border-border-subtle bg-surface-card text-text-secondary
-                transition-all duration-200 ease-smooth
-                hover:border-primary hover:text-primary hover:shadow-sm
-                active:scale-95
-                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-              "
-              style={{ animationDelay: `${idx * 0.05}s` }}
-            >
-              {cat.name}
-            </button>
-          ))}
+          <Link
+            href="/thuc-pham"
+            className={`
+              px-4 py-2 rounded-full text-sm font-medium cursor-pointer
+              transition-all duration-200 ease-smooth border
+              ${!categoryId 
+                ? 'bg-primary text-white border-primary shadow-md' 
+                : 'border-border-subtle bg-surface-card text-text-secondary hover:border-primary hover:text-primary'
+              }
+            `}
+          >
+            Tất cả
+          </Link>
+          {(categories as unknown as Category[]).map((cat, idx) => {
+            const isActive = categoryId === cat.id
+            return (
+              <Link
+                href={`/thuc-pham?category=${cat.id}`}
+                key={cat.id}
+                className={`
+                  px-4 py-2 rounded-full text-sm font-medium cursor-pointer
+                  transition-all duration-200 ease-smooth border
+                  ${isActive 
+                    ? 'bg-primary text-white border-primary shadow-md' 
+                    : 'border-border-subtle bg-surface-card text-text-secondary hover:border-primary hover:text-primary hover:shadow-sm'
+                  }
+                `}
+                style={{ animationDelay: `${idx * 0.05}s` }}
+              >
+                {cat.name}
+              </Link>
+            )
+          })}
         </div>
       )}
 

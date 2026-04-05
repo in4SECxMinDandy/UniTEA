@@ -120,6 +120,18 @@ export default function Header({ user, isAdmin }: { user: unknown; isAdmin?: boo
                           <div className="border-t border-border-subtle my-1" />
                         </>
                       )}
+                      
+                      <Link
+                        href="/history"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                      >
+                        <ShoppingBag size={14} />
+                        <span>Đơn hàng của tôi</span>
+                      </Link>
+                      
+                      <div className="border-t border-border-subtle my-1" />
+                      
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-accent-red hover:bg-accent-red-light/30 cursor-pointer transition-colors duration-150"
@@ -218,6 +230,16 @@ export default function Header({ user, isAdmin }: { user: unknown; isAdmin?: boo
                     <span>Quản trị</span>
                   </Link>
                 )}
+                
+                <Link
+                  href="/history"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                >
+                  <ShoppingBag size={16} />
+                  <span>Đơn hàng của tôi</span>
+                </Link>
+
                 <button
                   onClick={() => { setMobileOpen(false); handleLogout() }}
                   className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-accent-red hover:bg-accent-red-light/30 cursor-pointer transition-colors duration-150 w-full text-left"

@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
-import { ArrowLeft, ShoppingCart, CheckCircle2, Clock, ChefHat } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Clock, ChefHat } from 'lucide-react'
+import OrderForm from '@/components/food/OrderForm'
 
 export default async function FoodDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -20,6 +21,8 @@ export default async function FoodDetailPage({ params }: { params: Promise<{ slu
   if (!food) {
     notFound()
   }
+
+  const { data: { session } } = await supabase.auth.getSession()
 
   return (
     <div className="page-container py-12 sm:py-16">
@@ -122,23 +125,21 @@ export default async function FoodDetailPage({ params }: { params: Promise<{ slu
             )}
           </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-3">
-            <button
-              disabled={!food.is_available}
-              className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-            >
-              <ShoppingCart size={18} />
-              <span>Đặt hàng</span>
-            </button>
-            <Link
-              href="/thuc-pham"
-              className="btn-secondary flex items-center justify-center gap-2"
-            >
-              <ArrowLeft size={18} />
-              <span>Quay lại</span>
-            </Link>
-          </div>
+          {/* Action Component */}
+          <OrderForm 
+            foodId={food.id} 
+            price={food.price} 
+            isAvailable={food.is_available} 
+            userId={session?.user?.id || null} 
+          />
+
+          <Link
+            href="/thuc-pham"
+            className="btn-secondary w-full flex items-center justify-center gap-2 mt-4 py-3"
+          >
+            <ArrowLeft size={18} />
+            <span>Quay lại menu</span>
+          </Link>
         </div>
       </div>
     </div>

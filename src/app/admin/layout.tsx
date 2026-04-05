@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, UtensilsCrossed, MessageCircle, Tag, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, UtensilsCrossed, MessageCircle, Tag, Settings, LogOut, ShoppingBag } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const supabase = createClient()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [openChatCount, setOpenChatCount] = useState(0)
+  const [pendingOrderCount, setPendingOrderCount] = useState(0)
   const [loggingOut, setLoggingOut] = useState(false)
 
   useEffect(() => {
@@ -47,20 +48,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [])
 
   useEffect(() => {
-    async function loadChatCount() {
-      const { count } = await supabase
-        .from('chat_sessions')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'open')
-      setOpenChatCount(count ?? 0)
+    async function loadCounts() {
+      const [
+        { count: chatCount },
+        { count: orderCount }
+      ] = await Promise.all([
+        supabase
+          .from('chat_sessions')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'open'),
+        supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'pending')
+      ])
+      setOpenChatCount(chatCount ?? 0)
+      setPendingOrderCount(orderCount ?? 0)
     }
-    loadChatCount()
+    loadCounts()
 
-    const channel = supabase
+    const chatSub = supabase
       .channel('admin-layout-chat-count')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' }, () => { loadChatCount() })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_sessions' }, () => { loadCounts() })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    const orderSub = supabase
+      .channel('admin-layout-order-count')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => { loadCounts() })
+      .subscribe()
+    return () => { 
+      supabase.removeChannel(chatSub)
+      supabase.removeChannel(orderSub)
+    }
   }, [])
 
   async function handleSignOut() {
@@ -72,6 +90,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const adminLinks: AdminNavItem[] = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/orders', label: 'Đơn hàng', icon: ShoppingBag, badge: pendingOrderCount > 0 ? pendingOrderCount : undefined },
     { href: '/admin/foods', label: 'Quản lý món', icon: UtensilsCrossed },
     { href: '/admin/categories', label: 'Phân loại', icon: Tag },
     { href: '/admin/chat', label: 'Chat', icon: MessageCircle, badge: openChatCount > 0 ? openChatCount : undefined },

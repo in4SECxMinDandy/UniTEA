@@ -100,7 +100,7 @@ export default function AdminLoginPage() {
         }
       }
 
-      router.push('/admin')
+      window.location.href = '/admin'
     } catch (err: unknown) {
       setError(formatAuthFailureMessage(err))
       setLoading(false)
