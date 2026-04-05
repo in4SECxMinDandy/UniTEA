@@ -12,11 +12,17 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  
+  let isAdmin = false
+  if (user) {
+    const { data } = await supabase.rpc('has_role', { uid: user.id, role_name: 'STORE_ADMIN' })
+    isAdmin = data === true
+  }
 
   return (
     <html lang="vi">
       <body>
-        <Header user={user} />
+        <Header user={user} isAdmin={isAdmin} />
         <main>{children}</main>
         <Footer />
       </body>

@@ -366,6 +366,20 @@ export default function LoginPage() {
           </button>
           .
         </p>
+
+        {/* Staff portal link */}
+        <div className="mt-8 flex justify-center">
+          <a 
+            href="/adminlogin" 
+            className="text-[11px] font-medium text-text-muted hover:text-primary flex items-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-primary/5 transition-all duration-200"
+          >
+            <span>Dành cho nhân viên cửa hàng</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   )

@@ -30,13 +30,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     async function loadUser() {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       if (!authUser) return
+      // profiles table does not have an email column — use auth.email instead
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, email, full_name')
+        .select('id, full_name')
         .eq('id', authUser.id)
         .single()
-      if (profile) setUser(profile as unknown as UserProfile)
-      else setUser({ id: authUser.id, email: authUser.email ?? '', full_name: authUser.user_metadata?.full_name ?? authUser.email ?? 'Admin' })
+      setUser({
+        id: authUser.id,
+        email: authUser.email ?? '',
+        full_name: profile?.full_name ?? authUser.user_metadata?.full_name ?? authUser.email ?? 'Admin',
+      })
     }
     loadUser()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- supabase stable per component instance

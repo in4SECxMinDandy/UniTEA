@@ -11,7 +11,7 @@ const navLinks = [
   { href: '/thuc-pham', label: 'Thực phẩm' },
 ]
 
-export default function Header({ user }: { user: unknown }) {
+export default function Header({ user, isAdmin }: { user: unknown; isAdmin?: boolean }) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
@@ -71,20 +71,22 @@ export default function Header({ user }: { user: unknown }) {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
-                <Link
-                  href="/chat"
-                  className={`
-                    flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg cursor-pointer
-                    transition-all duration-200
-                    ${pathname === '/chat'
-                      ? 'text-primary bg-gray-50'
-                      : 'text-text-secondary hover:text-primary hover:bg-gray-50'
-                    }
-                  `}
-                >
-                  <MessageCircle size={16} />
-                  <span>Chat</span>
-                </Link>
+                {!isAdmin && (
+                  <Link
+                    href="/chat"
+                    className={`
+                      flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg cursor-pointer
+                      transition-all duration-200
+                      ${pathname === '/chat'
+                        ? 'text-primary bg-gray-50'
+                        : 'text-text-secondary hover:text-primary hover:bg-gray-50'
+                      }
+                    `}
+                  >
+                    <MessageCircle size={16} />
+                    <span>Chat</span>
+                  </Link>
+                )}
                 {/* User menu */}
                 <div className="relative">
                   <button
@@ -105,15 +107,19 @@ export default function Header({ user }: { user: unknown }) {
                   </button>
                   {userMenuOpen && (
                     <div className="absolute right-0 top-full mt-1 w-48 card-base shadow-card-base border border-border-subtle py-1 z-50 animate-scale-in">
-                      <Link
-                        href="/admin"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                      >
-                        <Settings size={14} />
-                        <span>Quản trị</span>
-                      </Link>
-                      <div className="border-t border-border-subtle my-1" />
+                      {isAdmin && (
+                        <>
+                          <Link
+                            href="/admin"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                          >
+                            <Settings size={14} />
+                            <span>Quản trị</span>
+                          </Link>
+                          <div className="border-t border-border-subtle my-1" />
+                        </>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-accent-red hover:bg-accent-red-light/30 cursor-pointer transition-colors duration-150"
@@ -192,22 +198,26 @@ export default function Header({ user }: { user: unknown }) {
                     <p className="text-xs text-text-muted truncate">{userRecord?.email}</p>
                   </div>
                 </div>
-                <Link
-                  href="/chat"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                >
-                  <MessageCircle size={16} />
-                  <span>Chat</span>
-                </Link>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
-                >
-                  <Settings size={16} />
-                  <span>Quản trị</span>
-                </Link>
+                {!isAdmin && (
+                  <Link
+                    href="/chat"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  >
+                    <MessageCircle size={16} />
+                    <span>Chat</span>
+                  </Link>
+                )}
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-text-secondary hover:text-primary hover:bg-gray-50 cursor-pointer transition-colors duration-150"
+                  >
+                    <Settings size={16} />
+                    <span>Quản trị</span>
+                  </Link>
+                )}
                 <button
                   onClick={() => { setMobileOpen(false); handleLogout() }}
                   className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium text-accent-red hover:bg-accent-red-light/30 cursor-pointer transition-colors duration-150 w-full text-left"

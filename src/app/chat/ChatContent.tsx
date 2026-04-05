@@ -18,6 +18,8 @@ interface ChatSession {
   id: string
   user_id: string
   status: string
+  session_type: string
+  guest_name: string | null
 }
 
 // Key used to persist chat session across page reloads for anonymous guests
@@ -33,6 +35,9 @@ function ChatContent() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [uploadProgress, setUploadProgress] = useState(false)
   const [invalidToken, setInvalidToken] = useState(false)
+  // Guest name prompt — shown once for anonymous QR guests
+  const [showNamePrompt, setShowNamePrompt] = useState(false)
+  const [guestNameInput, setGuestNameInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   // Keep a ref to current session id to avoid stale closure in realtime handler
@@ -130,11 +135,14 @@ function ChatContent() {
               user_id: user.id,
               visit_session_id: visitSession.id,
               visit_token: visitToken,
+              session_type: 'qr',
             })
             .select()
             .single()
           sessionId = newChat?.id ?? null
           resolvedSession = newChat as unknown as ChatSession ?? null
+          // Show name prompt for new QR sessions (anonymous guests)
+          if (sessionId && user.is_anonymous) setShowNamePrompt(true)
         }
       }
 
@@ -152,6 +160,21 @@ function ChatContent() {
         if (existing) {
           sessionId = existing.id
           resolvedSession = existing as unknown as ChatSession
+          // If user has a proper profile (not anonymous), mark as account type
+          if (!user.is_anonymous && existing.session_type !== 'account') {
+            await supabase.from('chat_sessions').update({ session_type: 'account' }).eq('id', existing.id)
+          }
+        } else if (!visitToken) {
+          // Create new session for logged-in user without QR
+          const { data: newSessionData } = await supabase
+            .from('chat_sessions')
+            .insert({ user_id: user.id, session_type: 'account' })
+            .select()
+            .single()
+          if (newSessionData) {
+            sessionId = newSessionData.id
+            resolvedSession = newSessionData as unknown as ChatSession
+          }
         }
       }
 
@@ -290,6 +313,20 @@ function ChatContent() {
     setSending(false)
   }
 
+  // ── Save guest name (for anonymous QR guests) ────────────────────────────
+  async function saveGuestName(name: string) {
+    if (!session) return
+    const trimmed = name.trim()
+    if (trimmed) {
+      await supabase
+        .from('chat_sessions')
+        .update({ guest_name: trimmed })
+        .eq('id', session.id)
+      setSession(prev => prev ? { ...prev, guest_name: trimmed } : prev)
+    }
+    setShowNamePrompt(false)
+  }
+
   // ── States ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -333,6 +370,42 @@ function ChatContent() {
   // ── Chat UI ───────────────────────────────────────────────────────────────
   return (
     <div className="page-container py-6 max-w-3xl">
+      {/* Guest Name Prompt Modal */}
+      {showNamePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm animate-scale-in">
+            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+              <MessageCircle size={22} className="text-amber-600" />
+            </div>
+            <h2 className="text-base font-bold text-primary text-center mb-1">Xin chào!</h2>
+            <p className="text-sm text-text-muted text-center mb-4">
+              Để nhân viên nhận ra bạn, bạn có muốn cho biết tên không?
+            </p>
+            <input
+              type="text"
+              placeholder="Nhập tên của bạn (tuỳ chọn)..."
+              value={guestNameInput}
+              onChange={e => setGuestNameInput(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveGuestName(guestNameInput) }}
+              className="input-field w-full mb-3"
+              autoFocus
+              maxLength={50}
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => saveGuestName(guestNameInput)}
+                className="btn-primary flex-1 text-sm"
+              >
+                {guestNameInput.trim() ? 'Xác nhận' : 'Bỏ qua'}
+              </button>
+            </div>
+            <p className="text-[11px] text-text-muted text-center mt-3">
+              Bạn có thể bỏ qua bước này và vẫn chat bình thường.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-10 h-10 rounded-full bg-accent-green-light flex items-center justify-center">

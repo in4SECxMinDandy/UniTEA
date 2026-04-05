@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { MessageCircle, Loader2, Clock, X, MessageSquare } from 'lucide-react'
+import { MessageCircle, Loader2, X, MessageSquare, Trash2 } from 'lucide-react'
 import AdminChatPanel from '@/components/admin/AdminChatPanel'
 
 interface ChatSession {
@@ -10,7 +10,10 @@ interface ChatSession {
   status: 'open' | 'closed'
   opened_at: string
   last_message_at: string
-  user: { full_name: string }
+  guest_name: string | null
+  session_type: 'qr' | 'account'
+  user: { full_name: string | null } | null
+  visit: { table_label: string | null } | null
 }
 
 export default function AdminChatPage() {
@@ -18,15 +21,33 @@ export default function AdminChatPage() {
   const [loading, setLoading] = useState(true)
   const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null)
   const [mobileShowChat, setMobileShowChat] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const supabase = createClient()
 
   async function load() {
     const { data } = await supabase
       .from('chat_sessions')
-      .select('*, user:profiles(full_name)')
+      .select('*, user:profiles(full_name), visit:visit_sessions(table_label)')
       .order('last_message_at', { ascending: false })
     if (data) setSessions(data as unknown as ChatSession[])
     setLoading(false)
+  }
+
+  // Resolve display name: account full_name > guest_name > table label > fallback
+  function getDisplayName(s: ChatSession): string {
+    if (s.user?.full_name) return s.user.full_name
+    if (s.guest_name) return s.guest_name
+    if (s.visit?.table_label) return s.visit.table_label
+    return 'Khách ẩn danh'
+  }
+
+  function getSessionBadge(s: ChatSession) {
+    if (s.session_type === 'account') {
+      return { label: 'Tài khoản', color: 'text-blue-600 bg-blue-50 border-blue-200' }
+    }
+    const tableLabel = s.visit?.table_label
+    return { label: tableLabel ? `QR · ${tableLabel}` : 'QR', color: 'text-amber-600 bg-amber-50 border-amber-200' }
   }
 
   useEffect(() => {
@@ -51,6 +72,21 @@ export default function AdminChatPage() {
     if (!confirm('Đóng phiên chat này?')) return
     await supabase.from('chat_sessions').update({ status: 'closed', closed_at: new Date().toISOString() }).eq('id', id)
     if (selectedSession?.id === id) setSelectedSession(null)
+    load()
+  }
+
+  async function deleteSession(e: React.MouseEvent, id: string) {
+    e.stopPropagation()
+    if (!confirm('Bạn có chắc muốn XÓA phiên chat này không?\nTất cả tin nhắn sẽ bị xóa vĩnh viễn.')) return
+    setDeletingId(id)
+    // Xóa tin nhắn trước, sau đó xóa session
+    await supabase.from('chat_messages').delete().eq('session_id', id)
+    await supabase.from('chat_sessions').delete().eq('id', id)
+    if (selectedSession?.id === id) {
+      setSelectedSession(null)
+      setMobileShowChat(false)
+    }
+    setDeletingId(null)
     load()
   }
 
@@ -130,9 +166,11 @@ export default function AdminChatPage() {
                 <div
                   key={s.id}
                   onClick={() => { setSelectedSession(s); setMobileShowChat(true) }}
+                  onMouseEnter={() => setHoveredId(s.id)}
+                  onMouseLeave={() => setHoveredId(null)}
                   className={`
-                    px-4 py-3.5 cursor-pointer transition-colors duration-150 border-b border-border-subtle last:border-0
-                    animate-fade-in
+                    relative px-4 py-3.5 cursor-pointer transition-colors duration-150 border-b border-border-subtle last:border-0
+                    animate-fade-in group
                     ${selectedSession?.id === s.id
                       ? 'bg-primary/5 border-l-2 border-l-primary'
                       : 'hover:bg-gray-50'
@@ -141,24 +179,36 @@ export default function AdminChatPage() {
                   style={{ animationDelay: `${idx * 0.02}s` }}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs font-bold text-primary">
-                        {(s.user?.full_name ?? 'N').charAt(0).toUpperCase()}
+                    {/* Avatar — QR guests get amber, account users get primary */}
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      s.session_type === 'account' ? 'bg-blue-100' : 'bg-amber-100'
+                    }`}>
+                      <span className={`text-xs font-bold ${
+                        s.session_type === 'account' ? 'text-blue-600' : 'text-amber-600'
+                      }`}>
+                        {getDisplayName(s).charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-0.5">
                         <span className="text-sm font-medium text-primary truncate">
-                          {s.user?.full_name ?? 'N/A'}
+                          {getDisplayName(s)}
                         </span>
-                        {s.status === 'open' && (
+                        {s.status === 'open' && hoveredId !== s.id && (
                           <span className="w-2 h-2 bg-accent-green rounded-full flex-shrink-0" />
                         )}
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className={`text-[11px] font-medium ${s.status === 'open' ? 'text-accent-green' : 'text-text-muted'}`}>
-                          {s.status === 'open' ? 'Mở' : 'Đã đóng'}
-                        </span>
+                      <div className="flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${
+                            getSessionBadge(s).color
+                          }`}>
+                            {getSessionBadge(s).label}
+                          </span>
+                          <span className={`text-[11px] font-medium ${s.status === 'open' ? 'text-accent-green' : 'text-text-muted'}`}>
+                            {s.status === 'open' ? '· Mở' : '· Đã đóng'}
+                          </span>
+                        </div>
                         <span className="text-[10px] text-text-muted">
                           {new Date(s.last_message_at).toLocaleString('vi-VN', {
                             day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
@@ -166,6 +216,27 @@ export default function AdminChatPage() {
                         </span>
                       </div>
                     </div>
+
+                    {/* Delete button - hiện khi hover */}
+                    <button
+                      onClick={(e) => deleteSession(e, s.id)}
+                      disabled={deletingId === s.id}
+                      className={`
+                        flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center
+                        transition-all duration-150 cursor-pointer
+                        text-text-muted hover:text-red-500 hover:bg-red-50
+                        ${hoveredId === s.id ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                        ${deletingId === s.id ? 'opacity-100' : ''}
+                      `}
+                      title="Xóa phiên chat"
+                      aria-label="Xóa phiên chat"
+                    >
+                      {deletingId === s.id ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={13} />
+                      )}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -183,7 +254,9 @@ export default function AdminChatPage() {
           {selectedSession ? (
             <AdminChatPanel
               sessionId={selectedSession.id}
-              userName={selectedSession.user?.full_name ?? 'Khách hàng'}
+              userName={getDisplayName(selectedSession)}
+              sessionType={selectedSession.session_type}
+              tableLabel={selectedSession.visit?.table_label ?? null}
               onClose={() => { setSelectedSession(null); setMobileShowChat(false) }}
             />
           ) : (

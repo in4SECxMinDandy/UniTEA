@@ -16,10 +16,12 @@ interface Message {
 interface AdminChatPanelProps {
   sessionId: string
   userName: string
+  sessionType?: 'qr' | 'account'
+  tableLabel?: string | null
   onClose?: () => void
 }
 
-export default function AdminChatPanel({ sessionId, userName, onClose }: AdminChatPanelProps) {
+export default function AdminChatPanel({ sessionId, userName, sessionType = 'qr', tableLabel, onClose }: AdminChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(true)
@@ -158,13 +160,28 @@ export default function AdminChatPanel({ sessionId, userName, onClose }: AdminCh
     <div className="flex flex-col h-full">
       {/* Chat header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-border-subtle bg-surface-card flex-shrink-0">
-        <div className="w-9 h-9 rounded-full bg-primary/5 flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-bold text-primary">
+        <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
+          sessionType === 'account' ? 'bg-blue-100' : 'bg-amber-100'
+        }`}>
+          <span className={`text-xs font-bold ${
+            sessionType === 'account' ? 'text-blue-600' : 'text-amber-600'
+          }`}>
             {(userName || 'K').charAt(0).toUpperCase()}
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-primary truncate">{userName || 'Khách hàng'}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-primary truncate">{userName || 'Khách hàng'}</p>
+            {sessionType === 'account' ? (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border text-blue-600 bg-blue-50 border-blue-200 flex-shrink-0">
+                Tài khoản
+              </span>
+            ) : (
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded border text-amber-600 bg-amber-50 border-amber-200 flex-shrink-0">
+                {tableLabel ? `QR · ${tableLabel}` : 'QR'}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-accent-green">Đang trò chuyện</p>
         </div>
         {onClose && (
