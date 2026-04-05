@@ -43,20 +43,14 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
-    if (tab === 'sessions') loadSessions()
+    loadSessions()
+    const channel = supabase
+      .channel('admin-visits')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'visit_sessions' }, () => { loadSessions() })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab])
-
-  useEffect(() => {
-    if (tab === 'sessions') {
-      const channel = supabase
-        .channel('admin-visits')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'visit_sessions' }, () => { loadSessions() })
-        .subscribe()
-      return () => { supabase.removeChannel(channel) }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab])
+  }, [])
 
   async function generateQR() {
     setLoading(true)
