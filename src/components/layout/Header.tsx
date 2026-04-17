@@ -36,7 +36,7 @@ export default function Header({ user, isAdmin }: { user: unknown; isAdmin?: boo
               <ShoppingBag size={16} className="text-white" />
             </div>
             <span className="text-xl font-bold text-primary tracking-tight">
-              UniTEA
+              universaltea
             </span>
           </Link>
 

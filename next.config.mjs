@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  outputFileTracingRoot: 'c:/Users/haqua/Documents/GitHub/UniTEA',
+  outputFileTracingRoot: 'c:/Users/haqua/Documents/GitHub/universaltea',
   images: {
     remotePatterns: [
       {

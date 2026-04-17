@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <ShoppingBag size={16} className="text-white" />
               </div>
-              <span className="text-lg font-bold text-primary">UniTEA</span>
+              <span className="text-lg font-bold text-primary">universaltea</span>
             </div>
             <p className="text-sm text-text-secondary leading-relaxed">
               Cửa hàng đồ ăn ngon — Giao tận nơi. Chất lượng tạo nên niềm tin.
@@ -72,14 +72,14 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-1.5 text-xs text-text-muted pt-1">
               <Heart size={12} className="text-accent-red fill-accent-red" />
-              <span>Yêu thương từ UniTEA</span>
+              <span>Yêu thương từ universaltea</span>
             </div>
           </div>
         </div>
 
         <div className="border-t border-border-subtle mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-text-muted">
-            © {new Date().getFullYear()} UniTEA. All rights reserved.
+            © {new Date().getFullYear()} universaltea. All rights reserved.
           </p>
           <p className="text-xs text-text-muted">
             Made with care for Vietnamese food lovers

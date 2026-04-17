@@ -8,7 +8,7 @@ export default function AboutPage() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/5 mb-6">
           <UtensilsCrossed size={28} className="text-primary" />
         </div>
-        <h1 className="section-heading mb-3">Về UniTEA</h1>
+        <h1 className="section-heading mb-3">Về universaltea</h1>
         <p className="text-text-secondary max-w-2xl mx-auto text-balance">
           Chúng tôi mang đến trải nghiệm ẩm thực tuyệt vời ngay tại nhà bạn —
           với chất lượng hàng đầu và dịch vụ tận tâm.
@@ -49,7 +49,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-bold text-primary mb-4">Câu chuyện của chúng tôi</h2>
         <div className="space-y-4 text-text-secondary text-sm leading-relaxed">
           <p>
-            Chào mừng bạn đến với <strong className="text-primary">UniTEA</strong> — cửa hàng đồ ăn ngon hàng đầu.
+            Chào mừng bạn đến với <strong className="text-primary">universaltea</strong> — cửa hàng đồ ăn ngon hàng đầu.
             Chúng tôi cung cấp các món ăn đa dạng, từ cơm, phở đến nước uống và tráng miệng,
             đảm bảo chất lượng và giá cả hợp lý.
           </p>
@@ -59,7 +59,7 @@ export default function AboutPage() {
             và nhận hàng tận nơi trong thời gian nhanh nhất.
           </p>
           <p>
-            Cảm ơn bạn đã tin tưởng và đồng hành cùng <strong className="text-primary">UniTEA</strong>.
+            Cảm ơn bạn đã tin tưởng và đồng hành cùng <strong className="text-primary">universaltea</strong>.
             Sự hài lòng của bạn là thành công của chúng tôi.
           </p>
         </div>

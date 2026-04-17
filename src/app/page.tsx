@@ -35,7 +35,7 @@ export default async function HomePage() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-primary tracking-tight text-balance mb-6 animate-fade-in-up">
             Chào mừng đến{' '}
             <span className="relative inline-block">
-              <span className="relative z-10">UniTEA</span>
+              <span className="relative z-10">universaltea</span>
               <span className="absolute bottom-1 left-0 right-0 h-3 bg-primary/10 rounded-sm -z-0" />
             </span>
           </h1>

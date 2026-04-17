@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
-  
+
   const router = useRouter()
   const supabase = createClient()
 
@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
         password,
         ...(captchaToken ? { options: { captchaToken } } : {}),
       })
-      
+
       if (signInError) throw signInError
 
       // Verify they have admin role right after login attempts
@@ -135,7 +135,7 @@ export default function AdminLoginPage() {
               <input
                 id="email"
                 type="email"
-                placeholder="admin@unitea.com"
+                placeholder="admin@universaltea.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="input-field"

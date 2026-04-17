@@ -23,7 +23,7 @@ interface ChatSession {
 }
 
 // Key used to persist chat session across page reloads for anonymous guests
-const SESSION_STORAGE_KEY = 'unitea_chat_session_id'
+const SESSION_STORAGE_KEY = 'universaltea_chat_session_id'
 
 function ChatContent() {
   const [session, setSession] = useState<ChatSession | null>(null)
@@ -56,7 +56,7 @@ function ChatContent() {
       .eq('session_id', sid)
       .order('created_at', { ascending: true })
     if (msgs) setMessages(msgs as unknown as Message[])
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
